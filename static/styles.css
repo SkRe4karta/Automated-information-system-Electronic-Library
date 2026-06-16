@@ -1,0 +1,58 @@
+/* Oceanic Calm Palette */
+:root {
+  /* Primary colors */
+  --primary: #0a3d62;            /* Deep blue */
+  --accent: #00d1b2;            /* Turquoise */
+  --primary-gradient: linear-gradient(135deg, var(--primary), var(--accent));
+
+  /* Background and surface */
+  --bg-color: #0b133e;          /* Very dark navy */
+  --card-bg: #15204d;           /* Dark slate for cards */
+  --border-color: #283e6c;      /* Subtle border */
+
+  /* Text */
+  --text-main: #f8fafc;         /* Light text */
+  --text-muted: #a0b5d8;        /* Soft muted blue */
+}
+
+/* Apply variables to existing components */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+.navbar {
+  background-color: rgba(21, 32, 77, 0.85) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.nav-link {
+  color: #cbd5e1 !important;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--accent) !important;
+}
+
+.btn-gradient {
+  background: var(--primary-gradient);
+  border: none;
+  color: #fff !important;
+}
+
+.card-custom {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.footer {
+  background-color: #0b0f19;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+/* Additional tweaks for better contrast */
+.alert-dismissible .btn-close {
+  filter: invert(1);
+}

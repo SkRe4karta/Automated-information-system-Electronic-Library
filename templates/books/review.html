@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Написать рецензию на «{{ book.title }}» | АИС «Электронная библиотека»{% endblock %}
+
+{% block extra_css %}
+<!-- EasyMDE CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<style>
+    /* Dark Mode styling for EasyMDE */
+    .editor-toolbar {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-color) !important;
+        border-top-left-radius: 8px !important;
+        border-top-right-radius: 8px !important;
+    }
+    .editor-toolbar a {
+        color: var(--text-main) !important;
+        transition: background-color 0.2s;
+    }
+    .editor-toolbar a:hover, .editor-toolbar a.active {
+        background-color: var(--border-color) !important;
+        border-color: var(--border-color) !important;
+    }
+    .editor-toolbar i.separator {
+        border-right: 1px solid var(--border-color) !important;
+    }
+    .CodeMirror {
+        background-color: #0b0f19 !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-color) !important;
+        border-bottom-left-radius: 8px !important;
+        border-bottom-right-radius: 8px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.95rem;
+    }
+    .CodeMirror-cursor {
+        border-left: 1px solid var(--text-main) !important;
+    }
+    .editor-preview-side, .editor-preview {
+        background-color: var(--bg-color) !important;
+        color: var(--text-main) !important;
+    }
+    .editor-statusbar {
+        color: var(--text-muted) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-custom p-4 shadow-sm border border-secondary mb-5">
+            <h2 class="card-title mb-2 font-weight-bold" style="font-family: 'Outfit', sans-serif;">
+                <i class="bi bi-chat-left-quote me-2 text-primary"></i>Написать рецензию
+            </h2>
+            <h5 class="text-secondary mb-4">на книгу «{{ book.title }}»</h5>
+            
+            <form method="POST" action="{{ url_for('books.create_review', book_id=book.id) }}">
+                <div class="mb-3">
+                    <label for="rating" class="form-label text-secondary small">Ваша оценка</label>
+                    <select class="form-select bg-dark border-secondary text-light" id="rating" name="rating" required>
+                        <option value="5" {% if form_data.get('rating') == '5' or not form_data.get('rating') %}selected{% endif %}>5 — отлично</option>
+                        <option value="4" {% if form_data.get('rating') == '4' %}selected{% endif %}>4 — хорошо</option>
+                        <option value="3" {% if form_data.get('rating') == '3' %}selected{% endif %}>3 — удовлетворительно</option>
+                        <option value="2" {% if form_data.get('rating') == '2' %}selected{% endif %}>2 — неудовлетворительно</option>
+                        <option value="1" {% if form_data.get('rating') == '1' %}selected{% endif %}>1 — плохо</option>
+                        <option value="0" {% if form_data.get('rating') == '0' %}selected{% endif %}>0 — ужасно</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="text" class="form-label text-secondary small">Текст рецензии (Markdown)</label>
+                    <textarea class="form-control bg-dark border-secondary text-light" id="text" name="text" rows="8">{{ form_data.get('text', '') }}</textarea>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('books.view', book_id=book.id) }}" class="btn btn-outline-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-gradient">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- EasyMDE JS -->
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const easyMDE = new EasyMDE({
+            element: document.getElementById('text'),
+            spellChecker: false,
+            placeholder: "Напишите ваши впечатления о книге с поддержкой разметки Markdown...",
+            status: ["words", "lines"],
+            renderingConfig: {
+                singleLineBreaks: false
+            },
+            tabSize: 4
+        });
+    });
+</script>
+{% endblock %}

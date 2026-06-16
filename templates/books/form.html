@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% from 'macros/book_form.html' import render_book_form %}
+
+{% block title %}
+    {% if action == 'create' %}Добавление книги{% else %}Редактирование: {{ book.title }}{% endif %} | АИС «Электронная библиотека»
+{% endblock %}
+
+{% block extra_css %}
+<!-- EasyMDE CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<style>
+    /* Dark Mode styling for EasyMDE */
+    .editor-toolbar {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-color) !important;
+        border-top-left-radius: 8px !important;
+        border-top-right-radius: 8px !important;
+    }
+    .editor-toolbar a {
+        color: var(--text-main) !important;
+        transition: background-color 0.2s;
+    }
+    .editor-toolbar a:hover, .editor-toolbar a.active {
+        background-color: var(--border-color) !important;
+        border-color: var(--border-color) !important;
+    }
+    .editor-toolbar i.separator {
+        border-right: 1px solid var(--border-color) !important;
+    }
+    .CodeMirror {
+        background-color: #0b0f19 !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-color) !important;
+        border-bottom-left-radius: 8px !important;
+        border-bottom-right-radius: 8px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.95rem;
+    }
+    .CodeMirror-cursor {
+        border-left: 1px solid var(--text-main) !important;
+    }
+    .editor-preview-side, .editor-preview {
+        background-color: var(--bg-color) !important;
+        color: var(--text-main) !important;
+    }
+    .editor-statusbar {
+        color: var(--text-muted) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card card-custom p-4 shadow-sm border border-secondary mb-5">
+            <h2 class="card-title mb-4 font-weight-bold" style="font-family: 'Outfit', sans-serif;">
+                {% if action == 'create' %}
+                    <i class="bi bi-journal-plus me-2 text-primary"></i>Добавить книгу
+                {% else %}
+                    <i class="bi bi-journal-medical me-2 text-warning"></i>Редактировать книгу
+                {% endif %}
+            </h2>
+            
+            {{ render_book_form(action, genres, form_data, book) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- EasyMDE JS -->
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const easyMDE = new EasyMDE({
+            element: document.getElementById('description'),
+            spellChecker: false,
+            placeholder: "Введите описание книги с поддержкой Markdown...",
+            status: ["words", "lines"],
+            renderingConfig: {
+                singleLineBreaks: false
+            },
+            tabSize: 4
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} | АИС «Электронная библиотека»{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-5">
+    <!-- Book Cover Column -->
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-custom p-2 border border-secondary shadow-sm text-center">
+            {% if book.cover %}
+                <img src="{{ url_for('static', filename='uploads/covers/' ~ book.cover.filename) }}" alt="{{ book.title }}" class="img-fluid rounded shadow" style="width: 100%; max-height: 400px; object-fit: cover;">
+            {% else %}
+                <div class="d-flex align-items-center justify-content-center bg-dark text-muted rounded shadow-inner" style="height: 350px;">
+                    <i class="bi bi-book" style="font-size: 5rem;"></i>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+
+    <!-- Book Details Column -->
+    <div class="col-md-8 col-lg-9">
+        <div class="card card-custom p-4 border border-secondary shadow-sm h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h1 class="font-weight-bold" style="font-family: 'Outfit', sans-serif;">{{ book.title }}</h1>
+                {% if current_user.is_authenticated and current_user.can_edit_book() %}
+                    <a href="{{ url_for('books.edit', book_id=book.id) }}" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Редактировать
+                    </a>
+                {% endif %}
+            </div>
+            
+            <h5 class="text-info mb-4">{{ book.author }}</h5>
+            
+            <div class="mb-4">
+                {% for genre in book.genres %}
+                    <span class="badge bg-primary bg-opacity-20 text-info border border-info border-opacity-20 fs-6 me-1 mb-1">{{ genre.name }}</span>
+                {% endfor %}
+            </div>
+
+            <table class="table table-dark table-borderless table-sm mb-4" style="max-width: 450px; background-color: transparent;">
+                <tbody>
+                    <tr>
+                        <td class="text-secondary ps-0" style="width: 150px;">Год издания:</td>
+                        <td class="text-light font-weight-medium">{{ book.year }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary ps-0">Издательство:</td>
+                        <td class="text-light font-weight-medium">{{ book.publisher }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary ps-0">Количество страниц:</td>
+                        <td class="text-light font-weight-medium">{{ book.pages }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary ps-0">Рейтинг:</td>
+                        <td class="text-light font-weight-medium">
+                            {% set filter_app = True %}
+                            {% set rating = book.average_rating(filter_approved=filter_app) %}
+                            {% if rating > 0 %}
+                                <span class="text-warning"><i class="bi bi-star-fill me-1"></i>{{ "%.1f"|format(rating) }}</span>
+                                <span class="text-secondary small">({{ book.reviews_count(filter_approved=filter_app) }} рецензий)</span>
+                            {% else %}
+                                <span class="text-muted">Нет оценок</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h5 class="border-bottom border-secondary pb-2 mb-3 text-light font-weight-semibold" style="font-family: 'Outfit', sans-serif;">Аннотация</h5>
+            <div class="book-description text-light-emphasis leading-relaxed" style="font-size: 1.05rem;">
+                {{ book.description|markdown }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Section -->
+<div class="card card-custom p-4 border border-secondary shadow-sm mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="font-weight-bold m-0" style="font-family: 'Outfit', sans-serif;">Рецензии читателей</h3>
+        
+        {% if current_user.is_authenticated %}
+            {% if not user_review %}
+                <a href="{{ url_for('books.create_review', book_id=book.id) }}" class="btn btn-gradient">
+                    <i class="bi bi-chat-left-text me-2"></i>Написать рецензию
+                </a>
+            {% endif %}
+        {% else %}
+            <span class="text-muted small">Войдите в систему, чтобы написать рецензию.</span>
+        {% endif %}
+    </div>
+
+    {% if user_review %}
+        <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded p-3 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="font-weight-bold text-info"><i class="bi bi-person-check me-2"></i>Ваша рецензия</span>
+                <div>
+                    <span class="badge {% if user_review.status and user_review.status.name == 'approved' %}bg-success{% elif user_review.status and user_review.status.name == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %} me-2">
+                        {% if user_review.status %}
+                            {% if user_review.status.name == 'approved' %}Одобрена
+                            {% elif user_review.status.name == 'rejected' %}Отклонена
+                            {% else %}На рассмотрении
+                            {% endif %}
+                        {% else %}
+                            Добавлена
+                        {% endif %}
+                    </span>
+                    <span class="text-warning">
+                        {% for i in range(user_review.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                        {% for i in range(5 - user_review.rating) %}<i class="bi bi-star"></i>{% endfor %}
+                    </span>
+                </div>
+            </div>
+            <div class="text-light-emphasis mt-2 review-content">
+                {{ user_review.text|markdown }}
+            </div>
+            <div class="text-end text-secondary mt-1" style="font-size: 0.8rem;">
+                {{ user_review.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="reviews-list">
+        {% set other_reviews = reviews %}
+        {# If user has review, exclude it from the main reviews list to avoid duplication #}
+        {% if user_review %}
+            {% set other_reviews = reviews | rejectattr("user_id", "equalto", current_user.id) | list %}
+        {% endif %}
+
+        {% if other_reviews %}
+            {% for r in other_reviews %}
+                <div class="border-bottom border-secondary py-3 {% if not loop.last %}mb-3{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="font-weight-semibold text-light">{{ r.user.full_name }}</span>
+                            <span class="text-secondary small ms-2">{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                        <div class="text-warning">
+                            {% for i in range(r.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                            {% for i in range(5 - r.rating) %}<i class="bi bi-star"></i>{% endfor %}
+                        </div>
+                    </div>
+                    <div class="text-light-emphasis review-content ps-3 border-start border-secondary border-opacity-50">
+                        {{ r.text|markdown }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            {% if not user_review %}
+                <div class="text-center py-4 text-secondary">
+                    <i class="bi bi-chat-square-dots" style="font-size: 2.5rem;"></i>
+                    <p class="mt-2 mb-0">Пока нет рецензий на эту книгу. Станьте первым!</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

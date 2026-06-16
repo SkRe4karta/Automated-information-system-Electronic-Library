@@ -1,0 +1,74 @@
+{% macro render_book_form(action, genres, form_data={}, book=None) %}
+<form method="POST" action="{% if action == 'create' %}{{ url_for('books.create') }}{% else %}{{ url_for('books.edit', book_id=book.id) }}{% endif %}" enctype="multipart/form-data">
+    <div class="row">
+        <!-- Left Column: Primary Fields -->
+        <div class="col-md-7">
+            <div class="mb-3">
+                <label for="title" class="form-label text-secondary small">Название книги</label>
+                <input type="text" class="form-control bg-dark border-secondary text-light" id="title" name="title" value="{{ form_data.get('title', '') }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="author" class="form-label text-secondary small">Автор</label>
+                <input type="text" class="form-control bg-dark border-secondary text-light" id="author" name="author" value="{{ form_data.get('author', '') }}" required>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="year" class="form-label text-secondary small">Год издания</label>
+                    <input type="number" class="form-control bg-dark border-secondary text-light" id="year" name="year" value="{{ form_data.get('year', '') }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="pages" class="form-label text-secondary small">Количество страниц</label>
+                    <input type="number" class="form-control bg-dark border-secondary text-light" id="pages" name="pages" value="{{ form_data.get('pages', '') }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="publisher" class="form-label text-secondary small">Издательство</label>
+                <input type="text" class="form-control bg-dark border-secondary text-light" id="publisher" name="publisher" value="{{ form_data.get('publisher', '') }}" required>
+            </div>
+            
+            {% if action == 'create' %}
+                <div class="mb-3">
+                    <label for="cover" class="form-label text-secondary small">Обложка книги (.png, .jpg, .jpeg, .gif)</label>
+                    <input type="file" class="form-control bg-dark border-secondary text-light" id="cover" name="cover" required>
+                    <div class="form-text text-muted small">Загрузка файла обложки обязательна при добавлении книги.</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Genres Selection -->
+        <div class="col-md-5">
+            <div class="mb-3 h-100 d-flex flex-column">
+                <label for="genres" class="form-label text-secondary small">Жанры</label>
+                <select class="form-select bg-dark border-secondary text-light flex-grow-1" id="genres" name="genres" multiple style="min-height: 250px;" required>
+                    {% for genre in genres %}
+                        {% set selected = false %}
+                        {% if form_data.get('genres') %}
+                            {% if genre.id in form_data.get('genres') or genre.id|string in form_data.get('genres') %}
+                                {% set selected = true %}
+                            {% endif %}
+                        {% endif %}
+                        <option value="{{ genre.id }}" {% if selected %}selected{% endif %}>{{ genre.name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text text-muted small mt-1">Удерживайте Ctrl для выбора нескольких жанров.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description field with EasyMDE -->
+    <div class="row mt-3">
+        <div class="col-12 mb-4">
+            <label for="description" class="form-label text-secondary small">Описание книги (Markdown)</label>
+            <textarea class="form-control bg-dark border-secondary text-light" id="description" name="description" rows="10">{{ form_data.get('description', '') }}</textarea>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <a href="{% if action == 'edit' %}{{ url_for('books.view', book_id=book.id) }}{% else %}{{ url_for('books.index') }}{% endif %}" class="btn btn-outline-secondary">Отмена</a>
+        <button type="submit" class="btn btn-gradient">Сохранить</button>
+    </div>
+</form>
+{% endmacro %}

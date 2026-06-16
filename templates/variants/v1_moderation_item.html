@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Рассмотрение рецензии | АИС «Электронная библиотека»{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-custom p-4 shadow-sm border border-secondary mb-5">
+            <h2 class="card-title mb-4 font-weight-bold" style="font-family: 'Outfit', sans-serif;">
+                <i class="bi bi-shield-exclamation me-2 text-warning"></i>Рассмотрение рецензии
+            </h2>
+            
+            <div class="mb-4">
+                <h5 class="text-secondary small mb-1">Книга</h5>
+                <h4 class="text-light font-weight-semibold">«{{ review.book.title }}»</h4>
+                <p class="text-info small mb-0">{{ review.book.author }}</p>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-secondary small mb-1">Автор рецензии</h5>
+                    <p class="text-light m-0">{{ review.user.full_name }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-secondary small mb-1">Оценка</h5>
+                    <span class="text-warning fs-5">
+                        {% for i in range(review.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                        {% for i in range(5 - review.rating) %}<i class="bi bi-star"></i>{% endfor %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="text-secondary small mb-2">Текст рецензии</h5>
+                <div class="bg-dark p-3 rounded text-light-emphasis leading-relaxed border border-secondary review-content">
+                    {{ review.text|markdown }}
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('variants.moderate_review', review_id=review.id) }}" class="d-flex justify-content-end gap-2 border-top border-secondary pt-3">
+                <a href="{{ url_for('variants.moderation_list') }}" class="btn btn-outline-secondary">Назад к списку</a>
+                <button type="submit" name="action" value="reject" class="btn btn-danger">Отклонить</button>
+                <button type="submit" name="action" value="approve" class="btn btn-success">Одобрить</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
